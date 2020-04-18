@@ -1,1 +1,1 @@
-#Simple vue js app with firebase
+#Simple vue js app with firebase and vue router and vuex
