@@ -22,6 +22,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   data() {
     return {
@@ -33,20 +35,43 @@ export default {
     onSubmit() {
       if (!this.newTask) return
       const newTask = this.setupTask(this.newTask)
-      this.tasks.push(newTask)
+      this.addNote(newTask).then(id => {
+        this.tasks.push({
+          ...newTask,
+          id
+        })
+      })
       this.newTask = null
+    },
+    async fetchData() {
+      const res = await axios.get(`${process.env.VUE_APP_URL}/tasks.json`)
+      return Object.keys(res.data).map(key => {
+        return {
+          ...res.data[key],
+          id: key
+        }
+      })
+    },
+    async addNote(task) {
+      const res = await axios.post(
+        `${process.env.VUE_APP_URL}/tasks.json`,
+        task
+      )
+      return res.data.name
     },
     setupTask(title) {
       return {
-        id: Date.now()
-          .toString()
-          .substr(8, 5),
         title,
         time: Date.now(),
         completed: false,
         important: false
       }
     }
+  },
+  async mounted() {
+    const tasks = await this.fetchData()
+    console.log(tasks, typeof tasks)
+    if (tasks) this.tasks = tasks
   }
 }
 </script>
