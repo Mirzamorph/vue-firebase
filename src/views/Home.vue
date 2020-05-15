@@ -13,51 +13,59 @@
         </button>
       </div>
     </form>
-    <ul class="list-group">
-      <li class="list-group-item" v-for="task in tasks" :key="task.id">
+    <transition-group class="list-group" name="items" tag="ul">
+      <li
+        class="list-group-item list-group-item-action"
+        v-for="task in tasks"
+        :key="task.id"
+        :class="{ important: task.important, completed: task.completed }"
+      >
         {{ task.title }}
+        <div class="list__actions">
+          <button
+            type="button"
+            class="btn btn-primary"
+            @click="toggleProperty(task, 'important')"
+          >
+            <i class="fa fa-star" aria-hidden="true"></i>
+          </button>
+          <button
+            type="button"
+            class="btn btn-success"
+            @click="toggleProperty(task, 'completed')"
+          >
+            <i class="fa fa-check" aria-hidden="true"></i>
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            @click="deleteTask(task.id)"
+          >
+            <i class="fa fa-trash" aria-hidden="true"></i>
+          </button>
+        </div>
       </li>
-    </ul>
+    </transition-group>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   data() {
     return {
-      newTask: null,
-      tasks: []
+      newTask: null
     }
   },
+  computed: mapState(['tasks']),
   methods: {
+    ...mapActions(['fetchTasks', 'addTask', 'deleteTask', 'updateTask']),
     onSubmit() {
       if (!this.newTask) return
       const newTask = this.setupTask(this.newTask)
-      this.addNote(newTask).then(id => {
-        this.tasks.push({
-          ...newTask,
-          id
-        })
-      })
+      this.addTask(newTask)
       this.newTask = null
-    },
-    async fetchData() {
-      const res = await axios.get(`${process.env.VUE_APP_URL}/tasks.json`)
-      return Object.keys(res.data).map(key => {
-        return {
-          ...res.data[key],
-          id: key
-        }
-      })
-    },
-    async addNote(task) {
-      const res = await axios.post(
-        `${process.env.VUE_APP_URL}/tasks.json`,
-        task
-      )
-      return res.data.name
     },
     setupTask(title) {
       return {
@@ -66,14 +74,55 @@ export default {
         completed: false,
         important: false
       }
+    },
+    toggleProperty(task, property) {
+      const updatedTask = { ...task }
+      updatedTask[property] = !updatedTask[property]
+      this.updateTask(updatedTask)
     }
   },
-  async mounted() {
-    const tasks = await this.fetchData()
-    console.log(tasks, typeof tasks)
-    if (tasks) this.tasks = tasks
+  mounted() {
+    this.fetchTasks()
   }
 }
 </script>
 
-<style lang="scss"></style>
+<style lang="scss" scoped>
+.list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+.list-group-item:hover .list__actions {
+  opacity: 1;
+}
+.list__actions {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.list__actions button {
+  margin-left: 10px;
+}
+.items-enter-active {
+  transition: all 0.3s ease-in;
+}
+.items-leave-active {
+  transition: all 0.3s ease-out;
+}
+.items-enter {
+  transform: translateX(50px);
+  opacity: 0;
+}
+.items-leave-to {
+  transform: translateX(-50px);
+  opacity: 0;
+}
+.important {
+  font-weight: bold;
+  border-color: #0069d9;
+}
+.completed {
+  border-color: #28a745;
+}
+</style>
