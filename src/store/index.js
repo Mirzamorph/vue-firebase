@@ -18,23 +18,27 @@ export default new Vuex.Store({
       state.tasks.push(payload)
     },
     DELETE_TASK(state, payload) {
-      const index = state.tasks.findIndex(item => item.id === payload)
-      state.tasks = [
-        ...state.tasks.slice(0, index),
-        ...state.tasks.slice(index + 1)
-      ]
+      state.tasks = state.tasks.filter(item => item.id !== payload)
+    },
+    UPDATE_TASK(state, payload) {
+      state.tasks = state.tasks.map(item => {
+        if (item.id === payload.id) {
+          return payload
+        }
+        return item
+      })
     }
   },
   actions: {
     fetchTasks({ commit }) {
       Firebase.fetchData()
         .then(res => {
-          commit('SETUP_TASKS', res)
+          if (res) commit('SETUP_TASKS', res)
         })
         .catch(e => console.log(e))
     },
     addTask({ commit }, newTask) {
-      Firebase.addTask()
+      Firebase.addTask(newTask)
         .then(id => {
           commit('ADD_TASK', {
             ...newTask,
@@ -47,6 +51,13 @@ export default new Vuex.Store({
       Firebase.deleteTask(id)
         .then(() => {
           commit('DELETE_TASK', id)
+        })
+        .catch(e => console.log(e))
+    },
+    updateTask({ commit }, task) {
+      Firebase.updateTask(task)
+        .then(res => {
+          if (res) commit('UPDATE_TASK', task)
         })
         .catch(e => console.log(e))
     }
