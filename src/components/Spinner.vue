@@ -16,7 +16,7 @@ export default {
 
 <style lang="scss" scoped>
 .spinner-large {
-  margin: 200px auto;
+  margin: 60px auto;
   text-align: center;
 }
 </style>
