@@ -1,43 +1,55 @@
 <template>
-  <transition-group class="list-group" name="items" tag="ul">
-    <li
-      class="list-group-item list-group-item-action"
-      v-for="task in tasks"
-      :key="task.id"
-      :class="{ important: task.important, completed: task.completed }"
-    >
-      {{ task.title }}
-      <div class="list__actions">
-        <button
-          type="button"
-          class="btn btn-primary"
-          @click="toggleProperty(task, 'important')"
-        >
-          <i class="fa fa-star" aria-hidden="true"></i>
-        </button>
-        <button
-          type="button"
-          class="btn btn-success"
-          @click="toggleProperty(task, 'completed')"
-        >
-          <i class="fa fa-check" aria-hidden="true"></i>
-        </button>
-        <button
-          type="button"
-          class="btn btn-danger"
-          @click="deleteTask(task.id)"
-        >
-          <i class="fa fa-trash" aria-hidden="true"></i>
-        </button>
-      </div>
-    </li>
-  </transition-group>
+  <div>
+    <transition-group class="list-group" name="items" tag="ul" v-if="onload">
+      <li
+        class="list-group-item list-group-item-action"
+        v-for="task in tasks"
+        :key="task.id"
+        :class="{ important: task.important, completed: task.completed }"
+      >
+        {{ task.title }}
+        <div class="list__actions">
+          <button
+            type="button"
+            class="btn btn-primary"
+            @click="toggleProperty(task, 'important')"
+          >
+            <i class="fa fa-star" aria-hidden="true"></i>
+          </button>
+          <button
+            type="button"
+            class="btn btn-success"
+            @click="toggleProperty(task, 'completed')"
+          >
+            <i class="fa fa-check" aria-hidden="true"></i>
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            @click="deleteTask(task.id)"
+          >
+            <i class="fa fa-trash" aria-hidden="true"></i>
+          </button>
+        </div>
+      </li>
+    </transition-group>
+    <Spinner is-large v-else />
+  </div>
 </template>
 
 <script>
 import { mapState, mapActions } from 'vuex'
+import Spinner from '@/components/Spinner'
 
 export default {
+  components: {
+    Spinner
+  },
+  data() {
+    return {
+      onload: false
+    }
+  },
   computed: mapState(['tasks']),
   methods: {
     ...mapActions(['fetchTasks', 'deleteTask', 'updateTask']),
@@ -48,7 +60,7 @@ export default {
     }
   },
   mounted() {
-    this.fetchTasks()
+    this.fetchTasks().then(() => (this.onload = true))
   }
 }
 </script>
