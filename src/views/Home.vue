@@ -13,20 +13,17 @@
         </button>
       </div>
     </form>
-    <TasksItem />
-    <Spinner isLarge />
+    <TasksItem @onload="onload = true" />
   </div>
 </template>
 
 <script>
 import { mapState, mapActions } from 'vuex'
 import TasksItem from '@/components/TasksItem'
-import Spinner from '@/components/Spinner'
 
 export default {
   components: {
-    TasksItem,
-    Spinner
+    TasksItem
   },
   data() {
     return {
