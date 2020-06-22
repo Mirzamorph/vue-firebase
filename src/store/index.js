@@ -31,7 +31,7 @@ export default new Vuex.Store({
   },
   actions: {
     fetchTasks({ commit }) {
-      Firebase.fetchData()
+      return Firebase.fetchData()
         .then(res => {
           if (res) commit('SETUP_TASKS', res)
         })
